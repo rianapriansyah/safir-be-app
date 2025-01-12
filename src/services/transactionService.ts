@@ -1,5 +1,5 @@
 ﻿import { supabase } from '@/lib/supabase';
-import { Transaction } from '@/utils/interfaceModels';
+import { RawTransactionData, Transaction } from '@/utils/interfaceModels';
 
 export async function getAllTransactions() {
 	const { data, error } = await supabase.from('transaction').select('*');
@@ -81,7 +81,7 @@ export async function getLatestUnfinishedTransactionByVin(vin: string) {
 //   return { success: true };
 // }
 
-function mapToTransaction(rawData: any): Transaction {
+function mapToTransaction(rawData: RawTransactionData): Transaction {
   return {
     id: rawData.id,
     vin: rawData.vin,
