@@ -1,24 +1,37 @@
 ﻿import { apiHandler } from '@/utils/apiHandler';
 import cors, { runMiddleware } from '@/utils/cors';
-import { getAllTransactions, addTransaction, updateTransaction, getTransactionById } from '@/services/transactionService';
+import { getAllTransactions, addTransaction, updateTransaction, getTransactionById, getAllTransactionsByVin, getLatestUnfinishedTransactionByVin } from '@/services/transactionService';
 
 export default apiHandler(async (req, res) => {
   await runMiddleware(req, res, cors);
 
   if (req.method === 'GET') {
-    const { id } = req.query;
-    
-    if(id){
-      if (typeof id !== 'number') {
+    const { id, vin, unfinished } = req.query;
+		
+		// Fetch transaction by ID
+    if (id) {
+      if (isNaN(Number(id))) {
         return res.status(400).json({ error: 'id must be a number.' });
       }
-      const transaction = await getTransactionById(id);
+      const transaction = await getTransactionById(Number(id));
       return res.status(200).json(transaction);
     }
-    else{
-      const transactions = await getAllTransactions();
-      return res.status(200).json(transactions);
+
+		// Fetch latest unfinished transaction by VIN
+    if (vin && unfinished) {
+      const latestUnfinishedTransaction = await getLatestUnfinishedTransactionByVin(vin as string);
+      return res.status(200).json(latestUnfinishedTransaction);
     }
+
+		// Fetch all transactions by VIN
+    if (vin) {
+      const transactionsByVin = await getAllTransactionsByVin(vin as string);
+      return res.status(200).json(transactionsByVin);
+    }
+    
+    // Fetch all transactions
+    const allTransactions = await getAllTransactions();
+    return res.status(200).json(allTransactions);
   }
 
   if (req.method === 'POST') {
