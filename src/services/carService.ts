@@ -1,4 +1,5 @@
 ﻿import { supabase } from '@/lib/supabase';
+import { Car } from '@/utils/interfaceModels';
 
 export async function getAllCars() {
   const { data, error } = await supabase.from('car').select('*');
@@ -30,17 +31,17 @@ export async function addCar(car: {
   return data;
 }
 
-export async function getCarById(id: number) {
-  const { data, error } = await supabase.from('car').select('*').eq('id', id).single();
+export async function getCarById(vin: string) {
+  const { data, error } = await supabase.from('car').select('*').eq('vin', vin).single();
   if (error) throw new Error(error.message);
   return data;
 }
 
-// export async function updateCar(id: number, car: Partial<Omit<typeof car, 'id'>>) {
-//   const { data, error } = await supabase.from('cars').update(car).eq('id', id);
-//   if (error) throw new Error(error.message);
-//   return data;
-// }
+export async function updateCar(vin: string, car: Partial<Omit<Car, 'vin'>>) {
+  const { data, error } = await supabase.from('car').update(car).eq('vin', vin);
+  if (error) throw new Error(error.message);
+  return data;
+}
 
 // export async function deleteCar(id: number) {
 //   const { error } = await supabase.from('cars').delete().eq('id', id);
