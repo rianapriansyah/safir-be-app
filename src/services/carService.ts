@@ -1,5 +1,5 @@
 ﻿import { supabase } from '@/lib/supabase';
-import { Car, RentType } from '@/utils/interfaceModels';
+import { Car } from '@/utils/interfaceModels';
 
 export async function getAllCars() {
   const { data, error } = await supabase.from('car').select('*');
