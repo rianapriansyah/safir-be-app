@@ -1,4 +1,4 @@
-﻿import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { RawTransactionData, Transaction } from '@/utils/interfaceModels';
 
 export async function getAllTransactions() {
@@ -7,19 +7,7 @@ export async function getAllTransactions() {
 	return data;
 }
 
-export async function addTransaction(transaction: {
-	vin:string;
-	name:string;
-	renterName:string;
-	renterPhone:string
-	rentType:string;
-	in:Date;
-	fuelOut:string;
-	fuelIn:string;
-	expectedPayment:number;
-	actualPayment:number;
-	desc:string;
-}) {
+export async function addTransaction(transaction: Transaction) {
 	const { data, error } = await supabase.from('transaction').insert([
 		{
 			vin:transaction.vin,
@@ -33,6 +21,7 @@ export async function addTransaction(transaction: {
 			expected_payment:transaction.expectedPayment,
 			actual_payment:transaction.actualPayment,
 			desc:transaction.desc,
+			completed:transaction.completed
 		},
 	]);
 	if (error) throw new Error(error.message);
@@ -48,21 +37,36 @@ export async function getTransactionById(id: number) {
 export async function getAllTransactionsByVin(vin: string) {
 	const { data, error } = await supabase.from('transaction').select('*').eq('vin', vin);
 	if (error) throw new Error(error.message);
-	return data;
+
+	// Map the raw data to the Transaction interface
+	return (data || []).map(mapToTransaction);
 }
 
-export async function updateTransaction(id: number, car: Partial<Omit<Transaction, 'id'>>) {
-	const { data, error } = await supabase.from('transaction').update(car).eq('id', id);
+export async function updateTransaction(id: number, transaction: Partial<Omit<Transaction, 'id'>>) {
+	const { data, error } = await supabase.from('transaction').update({
+		vin:transaction.vin,
+		car_name:transaction.name,
+		renter_name:transaction.renterName,
+		renter_phone:transaction.renterPhone,
+		rent_type:transaction.rentType,
+		in:transaction.in,
+		fuel_out:transaction.fuelOut,
+		fuel_in:transaction.fuelIn,
+		expected_payment:transaction.expectedPayment,
+		actual_payment:transaction.actualPayment,
+		desc:transaction.desc,
+		completed:transaction.completed
+	}).eq('id', id);
 	if (error) throw new Error(error.message);
 	return data;
 }
 
-export async function getLatestUnfinishedTransactionByVin(vin: string) {
+export async function getLatestUnfinishedTransactionByVin(vin: string, completed:string) {
   const { data, error } = await supabase
     .from('transaction')
     .select('*')
     .eq('vin', vin)
-    .is('in', null) // Assuming 'in' is null for unfinished transactions
+    .is('completed', completed) // Assuming 'in' is null for unfinished transactions
     .order('out', { ascending: false })
     .limit(1)
     .single();
@@ -96,5 +100,6 @@ function mapToTransaction(rawData: RawTransactionData): Transaction {
     expectedPayment: rawData.expected_payment || 0,
     actualPayment: rawData.actual_payment || 0,
     desc: rawData.desc || '',
+		completed:rawData.completed||false
   };
 }

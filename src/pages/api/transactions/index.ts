@@ -2,12 +2,12 @@
 import cors, { runMiddleware } from '@/utils/cors';
 import { getAllTransactions, addTransaction, updateTransaction, getTransactionById, getAllTransactionsByVin, getLatestUnfinishedTransactionByVin } from '@/services/transactionService';
 
+
 export default apiHandler(async (req, res) => {
   await runMiddleware(req, res, cors);
 
   if (req.method === 'GET') {
     const { id, vin, unfinished } = req.query;
-		
 		// Fetch transaction by ID
     if (id) {
       if (isNaN(Number(id))) {
@@ -19,7 +19,7 @@ export default apiHandler(async (req, res) => {
 
 		// Fetch latest unfinished transaction by VIN
     if (vin && unfinished) {
-      const latestUnfinishedTransaction = await getLatestUnfinishedTransactionByVin(vin as string);
+      const latestUnfinishedTransaction = await getLatestUnfinishedTransactionByVin(vin as string, unfinished as string);
       return res.status(200).json(latestUnfinishedTransaction);
     }
 
@@ -44,11 +44,13 @@ export default apiHandler(async (req, res) => {
     const { id } = req.query;
     const transactionData = req.body;
 
-    if (!id || typeof id !== 'number') {
-      return res.status(400).json({ error: 'Masukkan identitas plat nomor kendaraan!' });
+    if (id) {
+			if (isNaN(Number(id))) {
+        return res.status(400).json({ error: 'Id salah' });
+      }
     }
 
-    const updatedTransaction = await updateTransaction(id, transactionData);  
+    const updatedTransaction = await updateTransaction(Number(id), transactionData);  
     res.status(200).json({ message: 'Status diperbarui', updatedTransaction });
 
     try {

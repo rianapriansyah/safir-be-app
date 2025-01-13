@@ -1,5 +1,5 @@
 ﻿import { supabase } from '@/lib/supabase';
-import { Car } from '@/utils/interfaceModels';
+import { Car, RentType } from '@/utils/interfaceModels';
 
 export async function getAllCars() {
   const { data, error } = await supabase.from('car').select('*');
@@ -47,4 +47,8 @@ export async function updateCar(vin: string, car: Partial<Omit<Car, 'vin'>>) {
 //   const { error } = await supabase.from('cars').delete().eq('id', id);
 //   if (error) throw new Error(error.message);
 //   return { success: true };
+// }
+
+// function getCarRateByRentType(type:RentType, vin:string){
+//   const car = getCarById
 // }

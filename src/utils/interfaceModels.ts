@@ -23,6 +23,7 @@ export interface Transaction {
 	expectedPayment:number;
 	actualPayment:number;
 	desc:string;
+	completed:boolean;
 }
 
 export interface CarTransaction {
@@ -44,10 +45,11 @@ export interface RawTransactionData {
   renter_phone?: string;
   out: string; // ISO string or date string
   in?: string | null; // Optional or null for unfinished transactions
-  rent_type?: string;
+  rent_type: string;
   fuel_out?: string;
   fuel_in?: string;
   expected_payment?: number;
   actual_payment?: number;
   desc?: string;
+	completed:boolean;
 }
